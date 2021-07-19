@@ -25,7 +25,6 @@ public class Main {
         File f = new File("keystore.p12");
         if (!(f.isFile() && f.canRead())) {
             System.out.println("DON NOT EXIST -> FETCH");
-            cryptoManagement.fetchCertificate();
         }
 
         PrivateKey privateKey = cryptoManagement.getPrivateKey();

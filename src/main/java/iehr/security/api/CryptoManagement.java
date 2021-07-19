@@ -26,13 +26,6 @@ public interface CryptoManagement {
 
     /**
      *
-     * Responsible to get Certificate
-     *
-     */
-    public void fetchCertificate();
-
-    /**
-     *
      * Responsible for signing
      *
      */
