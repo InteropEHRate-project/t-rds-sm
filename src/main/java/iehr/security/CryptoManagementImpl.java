@@ -1,11 +1,15 @@
 package iehr.security;
 
+import eu.interopehrate.security_commons.encryptedCommunication.EncryptedCommunicationFactory;
 import eu.interopehrate.security_commons.services.ca.CAServiceFactory;
 import eu.interopehrate.security_commons.services.ca.api.CAService;
+import eu.interopehrate.security_commons.encryptedCommunication.api.EncryptedCommunication;
 import iehr.security.api.CryptoManagement;
 import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.*;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,11 +29,12 @@ public class CryptoManagementImpl implements CryptoManagement {
     private static final String KEYSTORE_NAME = "keystore.p12";
 
     private final CAService ca;
+    private final EncryptedCommunication encryptedCommunication;
 
     public CryptoManagementImpl(String caUrl) {
         ca = CAServiceFactory.create(caUrl);
+        encryptedCommunication = EncryptedCommunicationFactory.create();
     }
-
 
     @Override
     public PrivateKey getPrivateKey() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
@@ -89,6 +94,76 @@ public class CryptoManagementImpl implements CryptoManagement {
     @Override
     public Boolean validateUserCertificate(byte[] certificateData) throws IOException, ExecutionException, InterruptedException {
         return ca.validateUserCertificate(certificateData);
+    }
+
+    @Override
+    public String decrypt(String encryptedPayload, String symKey) throws Exception {
+        return encryptedCommunication.decrypt(encryptedPayload, symKey);
+    }
+
+    @Override
+    public String decryptb(byte[] encryptedPayload, String symKey) throws Exception {
+        return encryptedCommunication.decryptb(encryptedPayload, symKey);
+    }
+
+    @Override
+    public String encrypt(String payload, String symKey) throws Exception {
+        return encryptedCommunication.encrypt(payload,symKey);
+    }
+
+    @Override
+    public byte[] encryptb(String payload, String symKey) throws Exception {
+        return encryptedCommunication.encryptb(payload, symKey);
+    }
+
+    @Override
+    public String generateSymmtericKey() throws NoSuchAlgorithmException {
+        return encryptedCommunication.generateSymmtericKey();
+    }
+
+    @Override
+    public KeyPair aliceInitKeyPair() throws Exception {
+        return encryptedCommunication.aliceInitKeyPair();
+    }
+
+    @Override
+    public KeyAgreement aliceKeyAgreement(KeyPair aliceKpair) throws Exception {
+        return encryptedCommunication.aliceKeyAgreement(aliceKpair);
+    }
+
+    @Override
+    public byte[] alicePubKeyEnc(KeyPair aliceKpair) throws Exception {
+        return encryptedCommunication.alicePubKeyEnc(aliceKpair);
+    }
+
+    @Override
+    public KeyPair bobInitKeyPair(byte[] alicePubKeyEnc) throws Exception {
+        return encryptedCommunication.bobInitKeyPair(alicePubKeyEnc);
+    }
+
+    @Override
+    public KeyAgreement bobKeyAgreement(KeyPair bobKpair) throws Exception {
+        return encryptedCommunication.bobKeyAgreement(bobKpair);
+    }
+
+    @Override
+    public byte[] bobPubKeyEnc(KeyPair bobKpair) throws Exception {
+        return encryptedCommunication.bobPubKeyEnc(bobKpair);
+    }
+
+    @Override
+    public KeyAgreement aliceKeyAgreementFin(byte[] bobPubKeyEnc, KeyAgreement aliceKeyAgree) throws Exception {
+        return encryptedCommunication.aliceKeyAgreementFin(bobPubKeyEnc,aliceKeyAgree);
+    }
+
+    @Override
+    public KeyAgreement bobKeyAgreementFin(PublicKey alicePubKey, KeyAgreement bobKeyAgree) throws Exception {
+        return encryptedCommunication.bobKeyAgreementFin(alicePubKey, bobKeyAgree);
+    }
+
+    @Override
+    public SecretKeySpec generateSymmtericKey(byte[] sharedSecret, int size) {
+        return encryptedCommunication.generateSymmtericKey(sharedSecret, size);
     }
 
 }
