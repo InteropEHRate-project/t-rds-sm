@@ -3,7 +3,12 @@ package iehr.security;
 import iehr.security.api.CryptoManagement;
 import org.junit.Test;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,6 +25,37 @@ public class CryptoManagementTest {
         Boolean isValid = crypto.validateUserCertificate(certificate);
         assertThat(isValid, is(true));
     }
+
+    @Test
+    public  void testDiffieHellman() throws Exception {
+        //Alice
+        CryptoManagement crypto = CryptoManagementFactory.create(CA_URL);
+        KeyPair aliceKpair = crypto.aliceInitKeyPair();
+        KeyAgreement aliceKpairKA = crypto.aliceKeyAgreement(aliceKpair);
+        byte[] alicePubKeyEnc = crypto.alicePubKeyEnc(aliceKpair);
+        PublicKey alicePubKey = aliceKpair.getPublic();
+
+        //Bob
+        KeyPair bobkeypair = crypto.bobInitKeyPair(alicePubKeyEnc);
+        byte[] bobPubKeyEnc = crypto.bobPubKeyEnc(bobkeypair);
+        String bobPubKeyEncb = Base64.getEncoder().encodeToString(bobPubKeyEnc).replaceAll("\r", "").replaceAll("\n", "");
+
+        //Bob
+        KeyAgreement bobKeyAgreement = crypto.bobKeyAgreement(bobkeypair);
+        KeyAgreement symkeyagreement = crypto.bobKeyAgreementFin(alicePubKey, bobKeyAgreement);
+        byte[] bobSharedSecret = symkeyagreement.generateSecret();
+        SecretKeySpec symkeyspec = crypto.generateSymmtericKey(bobSharedSecret, 32);
+        String symkeys = Base64.getEncoder().encodeToString(symkeyspec.getEncoded()).replaceAll("\r", "").replaceAll("\n", "");
+
+        //Alice
+        KeyAgreement aliceSymkeyagreement = crypto.aliceKeyAgreementFin(bobPubKeyEnc,aliceKpairKA);
+        byte[] aliceSharedSecret = aliceSymkeyagreement.generateSecret();
+        SecretKeySpec aliceSymkeyspec = crypto.generateSymmtericKey(aliceSharedSecret,32);
+        String symkeystr = Base64.getEncoder().encodeToString(aliceSymkeyspec.getEncoded());
+
+        assertThat(symkeys, is(symkeystr));
+    }
+
 
     @Test
     public void testEncryptedCommunication() throws Exception {
