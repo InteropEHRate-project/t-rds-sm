@@ -22,11 +22,6 @@ public class Main {
 
         CryptoManagement cryptoManagement = CryptoManagementFactory.create(CA_URL);
 
-        File f = new File("keystore.p12");
-        if (!(f.isFile() && f.canRead())) {
-            System.out.println("DON NOT EXIST -> FETCH");
-        }
-
         PrivateKey privateKey = cryptoManagement.getPrivateKey();
         RSAPublicKey rsaPublicKey = cryptoManagement.getPublicKey();
 

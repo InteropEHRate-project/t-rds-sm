@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.interopehrate</groupId>
-    <artifactId>T-RDS-SM</artifactId>
-    <version>0.0.2</version>
+    <artifactId>trdssm</artifactId>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -40,7 +41,8 @@ public class CryptoManagementImpl implements CryptoManagement {
     public PrivateKey getPrivateKey() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         char[] password = KEYSTORE_PASSWORD.toCharArray();
         KeyStore keyStore=KeyStore.getInstance("PKCS12");
-        keyStore.load(new FileInputStream(KEYSTORE_NAME),password);
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(KEYSTORE_NAME);
+        keyStore.load(stream,password);
         PrivateKey key = (PrivateKey)keyStore.getKey(KEYSTORE_ALIAS, password);
         return (PrivateKey) key;
     }
@@ -51,8 +53,8 @@ public class CryptoManagementImpl implements CryptoManagement {
 
         // Reload the keystore
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(new FileInputStream(KEYSTORE_NAME), password);
-
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream(KEYSTORE_NAME);
+        keyStore.load(stream,password);
         java.security.cert.Certificate cert = keyStore.getCertificate(KEYSTORE_ALIAS);
         RSAPublicKey pkey = (RSAPublicKey)cert.getPublicKey();
         return pkey;

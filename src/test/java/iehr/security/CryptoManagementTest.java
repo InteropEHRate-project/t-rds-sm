@@ -1,6 +1,7 @@
 package iehr.security;
 
 import iehr.security.api.CryptoManagement;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.crypto.KeyAgreement;
@@ -18,6 +19,7 @@ public class CryptoManagementTest {
 
     public static final String CA_URL = "http://212.101.173.84:8071";
 
+    @Ignore
     @Test
     public void testCA() throws InterruptedException, ExecutionException, IOException {
         CryptoManagement crypto = CryptoManagementFactory.create(CA_URL);
