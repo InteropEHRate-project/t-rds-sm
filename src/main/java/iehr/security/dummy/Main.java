@@ -48,31 +48,29 @@ public class Main {
     private static void diffieHellman() throws Exception {
         CryptoManagement crypto = CryptoManagementFactory.create(CA_URL);
 
-        //Research center
-        KeyPair researchKpair = crypto.aliceInitKeyPair();
-        KeyAgreement researchKpairKA = crypto.aliceKeyAgreement(researchKpair);
-        byte[] alicePubKeyEnc = crypto.alicePubKeyEnc(researchKpair);
-        // send alicePubKeyEnc to mobile app..
+        //Mobile app
+        KeyPair mobileKpair = crypto.aliceInitKeyPair();
+        KeyAgreement mobileKpairKA = crypto.aliceKeyAgreement(mobileKpair);
+        byte[] mobilePubKeyEnc = crypto.alicePubKeyEnc(mobileKpair);
+        // send mobilePubKeyEnc to research center..
 
-        PublicKey alicePubKey = researchKpair.getPublic();
+        //Research Center
+        KeyPair researchkeypair = crypto.bobInitKeyPair(mobilePubKeyEnc);
+        KeyAgreement researchKeyAgreement = crypto.bobKeyAgreement(researchkeypair);
+        KeyAgreement symkeyagreement = crypto.bobKeyAgreementFin(mobilePubKeyEnc, researchKeyAgreement);
+        byte[] researchSharedSecret = symkeyagreement.generateSecret();
+        SecretKeySpec symkeyspec = crypto.generateSymmtericKey(researchSharedSecret, 32);
+        String symkeys = Base64.getEncoder().encodeToString(symkeyspec.getEncoded()).replaceAll("\r", "").replaceAll("\n", "");
+        System.out.println("Research center symkey: " + symkeys);
+        byte[] researchPubKeyEnc = crypto.bobPubKeyEnc(researchkeypair);
+        // send researchPubKeyEnc to mobile app
 
         //Mobile app
-        KeyPair mobilekeypair = crypto.bobInitKeyPair(alicePubKeyEnc);
-        KeyAgreement mobileKeyAgreement = crypto.bobKeyAgreement(mobilekeypair);
-        KeyAgreement symkeyagreement = crypto.bobKeyAgreementFin(alicePubKey, mobileKeyAgreement);
-        byte[] mobileSharedSecret = symkeyagreement.generateSecret();
-        SecretKeySpec symkeyspec = crypto.generateSymmtericKey(mobileSharedSecret, 32);
-        String symkeys = Base64.getEncoder().encodeToString(symkeyspec.getEncoded()).replaceAll("\r", "").replaceAll("\n", "");
-        System.out.println("Mobile app symkey: " + symkeys);
-        byte[] mobilePubKeyEnc = crypto.bobPubKeyEnc(mobilekeypair);
-        // send mobilePubKeyEnc to research center
-
-        //Research center
-        KeyAgreement aliceSymkeyagreement = crypto.aliceKeyAgreementFin(mobilePubKeyEnc,researchKpairKA);
-        byte[] aliceSharedSecret = aliceSymkeyagreement.generateSecret();
-        SecretKeySpec aliceSymkeyspec = crypto.generateSymmtericKey(aliceSharedSecret,32);
-        String symkeystr = Base64.getEncoder().encodeToString(aliceSymkeyspec.getEncoded());
-        System.out.println("Research Center symkey: " + symkeystr);
+        KeyAgreement mobileSymkeyagreement = crypto.aliceKeyAgreementFin(researchPubKeyEnc,mobileKpairKA);
+        byte[] mobileSharedSecret = mobileSymkeyagreement.generateSecret();
+        SecretKeySpec mobileSymkeyspec = crypto.generateSymmtericKey(mobileSharedSecret,32);
+        String symkeystr = Base64.getEncoder().encodeToString(mobileSymkeyspec.getEncoded());
+        System.out.println("Mobile app symkey: " + symkeystr);
     }
 
     public static void main(String[] args) throws Exception {

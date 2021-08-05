@@ -67,7 +67,7 @@ public class CryptoManagementTest {
 
         //Bob
         KeyAgreement bobKeyAgreement = crypto.bobKeyAgreement(bobkeypair);
-        KeyAgreement symkeyagreement = crypto.bobKeyAgreementFin(alicePubKey, bobKeyAgreement);
+        KeyAgreement symkeyagreement = crypto.bobKeyAgreementFin(alicePubKeyEnc, bobKeyAgreement);
         byte[] bobSharedSecret = symkeyagreement.generateSecret();
         SecretKeySpec symkeyspec = crypto.generateSymmtericKey(bobSharedSecret, 32);
         String symkeys = Base64.getEncoder().encodeToString(symkeyspec.getEncoded()).replaceAll("\r", "").replaceAll("\n", "");

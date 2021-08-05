@@ -165,8 +165,8 @@ public class CryptoManagementImpl implements CryptoManagement {
     }
 
     @Override
-    public KeyAgreement bobKeyAgreementFin(PublicKey alicePubKey, KeyAgreement bobKeyAgree) throws Exception {
-        return encryptedCommunication.bobKeyAgreementFin(alicePubKey, bobKeyAgree);
+    public KeyAgreement bobKeyAgreementFin(byte[] alicePubKeyEnc, KeyAgreement bobKeyAgree) throws Exception {
+        return encryptedCommunication.bobKeyAgreementFin(alicePubKeyEnc, bobKeyAgree);
     }
 
     @Override
