@@ -26,6 +26,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class CryptoManagementImpl implements CryptoManagement {
 
     private static final String KEYSTORE_ALIAS = "ResearchCenter";
+    private static final String RESEARCH_USERNAME = "research";
     private static final String KEYSTORE_PASSWORD = "interop";
     private static final String KEYSTORE_NAME = "keystore.p12";
 
@@ -96,6 +97,11 @@ public class CryptoManagementImpl implements CryptoManagement {
     @Override
     public Boolean validateUserCertificate(byte[] certificateData) throws IOException, ExecutionException, InterruptedException {
         return ca.validateUserCertificate(certificateData);
+    }
+
+    @Override
+    public X509Certificate toX509Certificate(byte[] certificateData) throws CertificateException {
+        return ca.toX509Certificate(certificateData);
     }
 
     @Override

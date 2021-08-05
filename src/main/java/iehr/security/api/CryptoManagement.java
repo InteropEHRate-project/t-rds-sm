@@ -5,6 +5,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.ExecutionException;
 
@@ -45,6 +46,7 @@ public interface CryptoManagement {
 
     Boolean validateUserCertificate(byte[] certificateData) throws IOException, ExecutionException, InterruptedException;
 
+    X509Certificate toX509Certificate(byte[] certificateData) throws CertificateException;
 
     /**
      *

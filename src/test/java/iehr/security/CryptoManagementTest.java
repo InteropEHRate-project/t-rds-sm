@@ -1,5 +1,6 @@
 package iehr.security;
 
+import iehr.security.api.ConsentManagement;
 import iehr.security.api.CryptoManagement;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -7,8 +8,10 @@ import org.junit.Test;
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 
@@ -19,25 +22,45 @@ public class CryptoManagementTest {
 
     public static final String CA_URL = "http://212.101.173.84:8071";
 
-    @Ignore
     @Test
-    public void testCA() throws InterruptedException, ExecutionException, IOException {
+    public void testCA() throws InterruptedException, ExecutionException, IOException, CertificateException {
         CryptoManagement crypto = CryptoManagementFactory.create(CA_URL);
-        byte[] certificate = crypto.getUserCertificate("GRxavi");
-        Boolean isValid = crypto.validateUserCertificate(certificate);
+        byte[] certificateData = crypto.getUserCertificate("GRxavi");
+        Boolean isValid = crypto.validateUserCertificate(certificateData);
         assertThat(isValid, is(true));
+        X509Certificate certificate = crypto.toX509Certificate(certificateData);
+        System.out.println(certificate.getIssuerDN().getName());
+    }
+
+    @Test
+    public void testConsent() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, SignatureException, InvalidKeyException {
+        ConsentManagement consentManagement = ConsentManagementFactory.create();
+
+        String consent = consentManagement.generateConsent();
+
+        CryptoManagement cryptoManagement = CryptoManagementFactory.create(CA_URL);
+
+        PrivateKey privateKey = cryptoManagement.getPrivateKey();
+        RSAPublicKey rsaPublicKey = cryptoManagement.getPublicKey();
+
+        String payload = consent;
+        String signed = cryptoManagement.signPayload(payload,privateKey);
+        Boolean verify = cryptoManagement.verifyPayload(rsaPublicKey,payload.getBytes(), signed.getBytes());
+
+        System.out.println("Sign " + signed);
+        System.out.println("Verify " + verify);
     }
 
     @Test
     public  void testDiffieHellman() throws Exception {
-        //Alice
+        //Alice / RRC
         CryptoManagement crypto = CryptoManagementFactory.create(CA_URL);
         KeyPair aliceKpair = crypto.aliceInitKeyPair();
         KeyAgreement aliceKpairKA = crypto.aliceKeyAgreement(aliceKpair);
         byte[] alicePubKeyEnc = crypto.alicePubKeyEnc(aliceKpair);
         PublicKey alicePubKey = aliceKpair.getPublic();
 
-        //Bob
+        //Bob / Mobile app
         KeyPair bobkeypair = crypto.bobInitKeyPair(alicePubKeyEnc);
         byte[] bobPubKeyEnc = crypto.bobPubKeyEnc(bobkeypair);
         String bobPubKeyEncb = Base64.getEncoder().encodeToString(bobPubKeyEnc).replaceAll("\r", "").replaceAll("\n", "");
