@@ -34,15 +34,26 @@ public class Main {
 
         // Research center
         Boolean isValid = cryptoManagement.validateUserCertificate(certificateData);
-        if(isValid) {
-            X509Certificate certificate = cryptoManagement.toX509Certificate(certificateData);
-            RSAPublicKey rsaPublicKey = (RSAPublicKey)certificate.getPublicKey();
-            Boolean verify = cryptoManagement.verifyPayload(rsaPublicKey,consent.getBytes(), signed.getBytes());
-            System.out.println("Verify " + verify);
-        }
-        else {
-            System.out.println("Certificate is not valid");
-        }
+        System.out.println("Check if user certificate is valid: "+ isValid);
+        X509Certificate certificate = cryptoManagement.toX509Certificate(certificateData);
+        RSAPublicKey rsaPublicKey = (RSAPublicKey)certificate.getPublicKey();
+        Boolean verify = cryptoManagement.verifyPayload(rsaPublicKey,consent.getBytes(), signed.getBytes());
+        System.out.println("Verify Payload: " + verify);
+        PrivateKey researchPrivateKey = cryptoManagement.getPrivateKey();
+        String researchSigned = cryptoManagement.signPayload(consent,researchPrivateKey);
+        System.out.println("Sign " + researchSigned);
+        byte[] researchCertificateData = cryptoManagement.getUserCertificate("research");
+        // send researchSigned and researchCertificateData to mobile app
+
+
+        // Mobile app
+        Boolean isReasearchCertificateValid = cryptoManagement.validateUserCertificate(researchCertificateData);
+        System.out.println("Check if research certificate is valid: "+ isReasearchCertificateValid);
+        X509Certificate researchCertificate = cryptoManagement.toX509Certificate(researchCertificateData);
+        RSAPublicKey rsaResearchPublicKey = (RSAPublicKey)researchCertificate.getPublicKey();
+        Boolean researchVerify = cryptoManagement.verifyPayload(rsaResearchPublicKey,consent.getBytes(), researchSigned.getBytes());
+        System.out.println("Verify Payload: " + researchVerify);
+
     }
 
     private static void diffieHellman() throws Exception {
@@ -71,6 +82,16 @@ public class Main {
         SecretKeySpec mobileSymkeyspec = crypto.generateSymmtericKey(mobileSharedSecret,32);
         String symkeystr = Base64.getEncoder().encodeToString(mobileSymkeyspec.getEncoded());
         System.out.println("Mobile app symkey: " + symkeystr);
+
+
+        //Mobile app
+        String encrypted = crypto.encrypt("sofianna", symkeystr);
+        // send encrypted to research center
+
+        //Research Center
+        String decrypted = crypto.decrypt(encrypted, symkeys);
+        System.out.println("Decrypted: "+decrypted);
+
     }
 
     public static void main(String[] args) throws Exception {
