@@ -1,1 +1,1 @@
-# InteropEHRate Terminal Research Data Sharing protocol's Security Management Library
+# InteropEHRate Terminal Research Data Sharing (RDS) protocol's Security Management Library
