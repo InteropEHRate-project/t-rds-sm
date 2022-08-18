@@ -13,16 +13,12 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
-    <!-- for nexus -->
+    <!-- for github -->
     <distributionManagement>
         <repository>
-            <id>nexus</id>
-            <url>http://213.249.46.206:8081/repository/maven-releases/</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/InteropEHRate-project/t-rds-sm</url>
         </repository>
-        <snapshotRepository>
-            <id>nexus</id>
-            <url>http://213.249.46.206:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
